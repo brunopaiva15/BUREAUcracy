@@ -19,6 +19,12 @@ To get started, download the project on GitHub. Unzip the folder somewhere on yo
 
 To deploy and test the application, navigate to the folder /BUREAUcracy/bin/Debug/ and install the BUREAUcracy.exe service using this tutorial : https://docs.microsoft.com/en-us/dotnet/framework/windows-services/how-to-install-and-uninstall-services#install-using-installutilexe-utility.
 
+## If you do not want to read the boring Microsoft tutorial
+
+1. Open cmd
+2. Navigate to C:\Windows\Microsoft.NET\Framework\v4.0.30319
+3. Write InstallUtil.exe + The location of BUREAUcracy.exe
+
 ## ✒ Authors
 
 * **Bruno Paiva** - https://vergasta.ch
