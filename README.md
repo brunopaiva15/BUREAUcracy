@@ -25,6 +25,7 @@ To deploy and test the application, navigate to the folder /BUREAUcracy/bin/Debu
 2. Navigate to C:\Windows\Microsoft.NET\Framework\v4.0.30319
 3. Write InstallUtil.exe + The location of BUREAUcracy.exe
 4. Write net start BUREAUcracy
+5. Enjoy
 
 ## ✒ Authors
 
