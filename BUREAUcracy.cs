@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using System.Management;
 
 namespace BUREAUcracy
 {
@@ -23,6 +24,12 @@ namespace BUREAUcracy
 
         protected override void OnStart(string[] args)
         {
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem");
+            ManagementObjectCollection collection = searcher.Get();
+            string username = (string)collection.Cast<ManagementBaseObject>().First()["UserName"];
+
+            username = username.Substring(username.IndexOf('\\') + 1);
+
             try
             {
                 if (!EventLog.SourceExists("BUREAUcracy"))
@@ -35,7 +42,7 @@ namespace BUREAUcracy
 
                 myLog.WriteEntry("Service started.");
 
-                var watcher = new FileSystemWatcher(@"C:\Users\" + "ppaiv" + @"\Desktop");
+                var watcher = new FileSystemWatcher(@"C:\Users\" + username + @"\Desktop");
 
                 watcher.NotifyFilter = NotifyFilters.Attributes
                                     | NotifyFilters.CreationTime
@@ -50,13 +57,12 @@ namespace BUREAUcracy
                 watcher.Error += OnError;
 
                 watcher.IncludeSubdirectories = true;
-                watcher.EnableRaisingEvents = true;
+                watcher.EnableRaisingEvents = true;               
 
             }
             catch(Exception ex)
             {
                 myLog.WriteEntry("An error has occured. Error: " + ex.Message);
-                throw new Exception(ex.Message);
             }
             
         }
@@ -72,7 +78,19 @@ namespace BUREAUcracy
                 {
                     if (Directory.Exists(e.FullPath))
                     {
-                        DeleteDirectory(e.FullPath);
+                        bool deleted = false;
+                        do
+                        {
+                            try
+                            {
+                                Directory.Delete(e.FullPath, true);
+                                deleted = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                Thread.Sleep(50);
+                            }
+                        } while (deleted == false);
                     }              
                 }
                 else
@@ -83,7 +101,10 @@ namespace BUREAUcracy
 
                         FileInfo file = new FileInfo(e.FullPath);
                         while (IsFileLocked(file))
+                        {
                             Thread.Sleep(1000);
+                        }
+
                         file.Delete();
                     }            
                 }
@@ -91,7 +112,6 @@ namespace BUREAUcracy
             catch (Exception ex)
             {
                 myLog.WriteEntry("An error has occured. Error: " + ex.Message);
-                throw new Exception(ex.Message);
             }
                 
         }
@@ -139,25 +159,6 @@ namespace BUREAUcracy
 
             //file is not locked
             return false;
-        }
-
-        protected static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
         }
     }
 }
